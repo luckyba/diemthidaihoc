@@ -11,8 +11,8 @@ class AsyncGet(Thread):
         super().__init__()
 
     def run(self):
-        data = []
-        for sbd in range(2000001, 2000006):
+        self.data = []
+        for sbd in range(2000001, 2074000):
             dir_row = {}
             #print("sbd: ", sbd)
             _title = _name = _birth_day_ = _scores = ""
@@ -45,11 +45,9 @@ class AsyncGet(Thread):
 
                 dir_row |= self.convert_score_to_value(score=_scores)
 
-                print(dir_row)
-            data.append(dir_row)
-        print(" data ", len(data))
-        self.save_to_csv_file(data)
-
+                #print(dir_row)
+            self.data.append(dir_row)
+        #print(" data ", len(self.data))
 
     def get_data(self, sbd):
         cmd = "curl --data " + '"SoBaoDanh=0{}"'.format(sbd) + " http://diemthi.hcm.edu.vn/Home/Show"
@@ -165,25 +163,6 @@ class AsyncGet(Thread):
         #print(score_dict)
         return score_dict
 
-    def save_to_csv_file (self, data):
-        print(data)
-        # field name
-        fields = ['SBD', 'Họ và tên', 'Năm Sinh', 'Toán', 'Ngữ Văn', 'Vật lý', 'Hóa Học', 'Sinh Học', 'KHTN', 'Tiếng Anh'
-                  , 'Lịch Sử', 'Địa Lý', 'GDCD', 'KHXH']
-
-        file_name = "list_hs.csv"
-
-        # writing to csv file
-        with open(file_name, 'w', encoding="utf-8") as csvfile:
-            # creating a csv dict writer object
-            writer = csv.DictWriter(csvfile, fieldnames=fields)
-
-            # writing headers (field names)
-            writer.writeheader()
-
-            # writing data rows
-            writer.writerows(data)
-
         # def get_facebook ():
 #     fb = subprocess.check_output("curl https://www.facebook.com/")
 #     fb = fb.decode("utf-8")
@@ -192,10 +171,30 @@ class AsyncGet(Thread):
 #     print(_clean_data)
 
 
-if __name__ == '__main__':
-    data = AsyncGet()
-    data.start()
-    print("run in foreground")
-    data.join()
+def save_to_csv_file (data):
+    print(data)
+    # field name
+    fields = ['SBD', 'Họ và tên', 'Năm Sinh', 'Toán', 'Ngữ Văn', 'Vật lý', 'Hóa Học', 'Sinh Học', 'KHTN', 'Tiếng Anh'
+                  , 'Lịch Sử', 'Địa Lý', 'GDCD', 'KHXH']
 
+    filename = "list_student.csv"
+    # writing to csv file
+    with open(filename, 'w', encoding="utf-8") as csvfile:
+        # creating a csv dict writer object
+        writer = csv.DictWriter(csvfile, fieldnames=fields)
+
+        # writing headers (field names)
+        writer.writeheader()
+
+        # writing data rows
+        writer.writerows(data)
+
+
+if __name__ == '__main__':
+    asyndata = AsyncGet()
+    asyndata.start()
+    print("run in foreground")
+    asyndata.join()
+    data = asyndata.data
+    save_to_csv_file(data)
     #get_facebook()
