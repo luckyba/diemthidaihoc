@@ -3,6 +3,7 @@ import subprocess
 from threading import Thread
 import re
 import csv
+import datetime
 from pynput import keyboard
 
 
@@ -63,6 +64,7 @@ class AsyncGet(Thread):
         _clean_data = _clean_data.replace('&#192;', 'À')
         _clean_data = _clean_data.replace('&#193;', 'Á')
         _clean_data = _clean_data.replace('&#194;', 'Â')
+        _clean_data = _clean_data.replace('&#195;', 'Ã')
 
         _clean_data = _clean_data.replace('&#200;', 'È')
         _clean_data = _clean_data.replace('&#201;', 'É')
@@ -74,6 +76,7 @@ class AsyncGet(Thread):
         _clean_data = _clean_data.replace("&#210;", "Ò")
         _clean_data = _clean_data.replace("&#211;", "Ó")
         _clean_data = _clean_data.replace("&#212;", "Ô")
+        _clean_data = _clean_data.replace("&#213;", "Õ")
 
         _clean_data = _clean_data.replace("&#217;", "Ù")
         _clean_data = _clean_data.replace("&#218;", "Ú")
@@ -94,11 +97,13 @@ class AsyncGet(Thread):
         _clean_data = _clean_data.replace("&#242;", "ò")
         _clean_data = _clean_data.replace("&#243;", "ó")
         _clean_data = _clean_data.replace("&#244;", "ô")
+        _clean_data = _clean_data.replace("&#245;", "õ")
 
         _clean_data = _clean_data.replace("&#249;", "ù")
         _clean_data = _clean_data.replace("&#250;", "ú")
 
         _clean_data = _clean_data.replace("&#253;", "ý")
+
 
         # print("clean data ", _clean_data, test)
         return _clean_data
@@ -106,7 +111,8 @@ class AsyncGet(Thread):
 
     def convert_score_to_value(self, score):
         toan = ngu_van = vat_ly = hoa_hoc = sinh_hoc = khtn = tieng_anh = gdcd = \
-            lich_su = dia_ly = khxh = -1
+            lich_su = dia_ly = khxh = tieng_trung = tieng_han = tieng_nga \
+            = tieng_phap = tieng_duc = tieng_nhat = -1
         # print("score: ", score)
         _temp1 = list(score.split(" "))
         # print(" temp ", _temp1)
@@ -115,7 +121,7 @@ class AsyncGet(Thread):
             if v:
                 _temp2.append(v)
                 #print(v)
-        # print("temp2 ", _temp2)
+        #print("temp2 ", _temp2)
         leng = len(_temp2)
         for i in range(leng):
             #print("i ", i, " c[i] ", _temp2[i])
@@ -146,12 +152,29 @@ class AsyncGet(Thread):
             if _temp2[i] == 'Địa':
                 dia_ly = float(_temp2[i + 2])
                 continue
-            if _temp2[i] == 'GDCD':
+            if _temp2[i] == 'GDCD:':
                 gdcd = float(_temp2[i + 1])
                 continue
-            if _temp2[i] == 'KHXH':
+            if _temp2[i] == 'KHXH:':
                 khxh = float(_temp2[i + 1])
                 continue
+
+            if _temp2[i] == 'Trung:':
+                tieng_trung = float(_temp2[i + 1])
+                continue
+            if _temp2[i] == 'Hàn:':
+                tieng_han = float(_temp2[i + 1])
+                continue
+            if _temp2[i] == 'Pháp:':
+                tieng_phap = float(_temp2[i + 1])
+                continue
+            if _temp2[i] == 'Nhật:':
+                tieng_nhat = float(_temp2[i + 1])
+                continue
+            if _temp2[i] == 'Đức:':
+                tieng_duc = float(_temp2[i + 1])
+                continue
+
 
         # print("toan ", toan, " ngu van ", ngu_van, " Lich su ", lich_su, " dia ly ", dia_ly,
         #       " gdcd ", gdcd, " khxh ", khxh, " tieng anh ", tieng_anh, " vat ly ", vat_ly,
@@ -159,7 +182,9 @@ class AsyncGet(Thread):
 
         score_dict = {'Toán': toan, 'Ngữ Văn': ngu_van, 'Vật lý': vat_ly, 'Hóa Học': hoa_hoc
             , 'Sinh Học': sinh_hoc, 'KHTN': khtn, 'Tiếng Anh': tieng_anh, 'Lịch Sử': lich_su
-            , 'Địa Lý': dia_ly, 'GDCD': gdcd, 'KHXH': khxh}
+            , 'Địa Lý': dia_ly, 'GDCD': gdcd, 'KHXH': khxh, 'Tiếng Trung': tieng_trung, 'Tiếng Hàn': tieng_han
+                      , 'Tiếng Nga': tieng_nga, 'Tiếng Pháp': tieng_phap, 'Tiếng Đức': tieng_duc
+                      , 'Tiếng Nhật': tieng_nhat}
         #print(score_dict)
         return score_dict
 
@@ -172,12 +197,13 @@ class AsyncGet(Thread):
 
 
 def save_to_csv_file (data):
-    print(data)
+    #print(data)
     # field name
     fields = ['SBD', 'Họ và tên', 'Năm Sinh', 'Toán', 'Ngữ Văn', 'Vật lý', 'Hóa Học', 'Sinh Học', 'KHTN', 'Tiếng Anh'
-                  , 'Lịch Sử', 'Địa Lý', 'GDCD', 'KHXH']
+                  , 'Lịch Sử', 'Địa Lý', 'GDCD', 'KHXH', 'Tiếng Trung', 'Tiếng Hàn', 'Tiếng Nga', 'Tiếng Pháp'
+              , 'Tiếng Đức', 'Tiếng Nhật']
 
-    filename = "list_student.csv"
+    filename = "test_list_student.csv"
     # writing to csv file
     with open(filename, 'w', encoding="utf-8") as csvfile:
         # creating a csv dict writer object
@@ -193,8 +219,10 @@ def save_to_csv_file (data):
 if __name__ == '__main__':
     asyndata = AsyncGet()
     asyndata.start()
-    print("run in foreground")
+    print("run in foreground", " current time ", datetime.datetime.now())
     asyndata.join()
     data = asyndata.data
+    print( "current time after get data", datetime.datetime.now())
     save_to_csv_file(data)
+    print( "current time after save to csv", datetime.datetime.now())
     #get_facebook()
